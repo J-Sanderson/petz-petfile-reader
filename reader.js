@@ -40,7 +40,7 @@ fs.readFile(process.argv[2], function (err, data) {
         .uint32('fileChecksum')
         .array('guid', {
             type: 'uint8',
-            length: 16, //16 bytes, could be parsed better, we're just keeping this as a placeholder.
+            length: 16,
         })
         .saveOffset('currentOffset')
     const loadInfo = loadInfoParser.parse(data);
@@ -493,7 +493,7 @@ fs.readFile(process.argv[2], function (err, data) {
     //todo bitmap data
 
     // console.log(loadInfo);
-    // console.log(plainData);
+    console.log(plainData.trickKnowledge);
     // console.log(lnzInfo);
     // console.log(veterinaryInfo);
     // console.log(genome);
@@ -585,7 +585,7 @@ Last saved: ${new Date(plainData.lastSaved * 1000)}
 Random seed: ${plainData.randomSeed}
 
 Trick knowledge:
-TODO
+${parseTrickKnowledge(plainData.trickKnowledge)}
 
 Biorhythms:
 Energy: ${plainData.energy}
@@ -709,4 +709,56 @@ function parseGUID(guid) {
     return guid.map(function(byte) {
         return byte.toString(16);
     }).join(' ');
+}
+
+function parseTrickKnowledge(tricks) {
+    const unsetAction = 4294967295; //hex FFFFFFFF
+    // is this also in use for direction/angle/association
+
+    return tricks.map(function (trick, index) {
+        return `
+Trick slot: ${index}
+Flavor: ${getTrickFlavor(index)}
+Gesture: TODO
+Plan ID: ${trick.planID}
+Associated action: ${trick.associatedAction === unsetAction ? 'Not set' : trick.associatedAction + ' (breed SCP action ID)'} 
+Direction: ${trick.direction}
+Angle: ${trick.angle}
+Association: ${trick.angle}
+        `
+    }).join('');
+}
+
+function getTrickFlavor(index) {
+    let flavor = '';
+    switch (true) {
+        case (index <= 15):
+            flavor = 'Chicken';
+            break;
+        case (index > 15 && index <= 30):
+            flavor = 'Beef';
+            break;
+        case (index > 30 && index <= 45):
+            flavor = 'Fish';
+            break;
+        case (index > 45 && index <= 60):
+            flavor = 'Turkey';
+            break;
+        case (index > 60 && index <= 75):
+            flavor = 'Milk';
+            break;
+        case (index > 75 && index <= 100):
+            flavor = 'Sweets';
+            break;
+        case (index > 100 && index <= 105):
+            flavor = 'Catnip';
+            break;
+        case (index > 105 && index <= 120):
+            flavor = 'Cheese';
+            break;
+        default:
+            return 'Unknown';
+    }
+
+    return flavor;
 }
