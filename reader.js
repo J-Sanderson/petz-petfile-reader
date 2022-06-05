@@ -493,7 +493,7 @@ fs.readFile(process.argv[2], function (err, data) {
     //todo bitmap data
 
     // console.log(loadInfo);
-    console.log(plainData.trickKnowledge);
+    // console.log(plainData);
     // console.log(lnzInfo);
     // console.log(veterinaryInfo);
     // console.log(genome);
@@ -618,10 +618,10 @@ Padding value: ${plainData.padding}
 LNZ INFO:
 
 Lnz:
-TODO
+See LNZ Pro.
 
 Clothing info:
-TODO
+${parseClothingInfo(lnzInfo.clothing)}
 
 Breedfile info:
 Number of required breedfiles: ${lnzInfo.numRequiredBreedfiles}
@@ -713,7 +713,7 @@ function parseGUID(guid) {
 
 function parseTrickKnowledge(tricks) {
     const unsetAction = 4294967295; //hex FFFFFFFF
-    // is this also in use for direction/angle/association
+    // is this also in use for direction/angle/association?
 
     return tricks.map(function (trick, index) {
         return `
@@ -730,6 +730,7 @@ Association: ${trick.angle}
 }
 
 function getTrickFlavor(index) {
+    // TODO need to slice array into flavours and get geture slots by position
     let flavor = '';
     switch (true) {
         case (index <= 15):
@@ -762,3 +763,44 @@ function getTrickFlavor(index) {
 
     return flavor;
 }
+
+function parseClothingInfo(slots) {
+    return slots.map(function(slot) {
+        if (slot.slotNumber) {
+            return `
+Slot: ${clothesList[slot.slotNumber]}
+File path: ${slot.clothingFilePath}
+Resource path: ${slot.clothingResourcePath}
+            `;
+        }
+    }).join('');
+}
+
+const flavorList = [
+    'Chicken',
+    'Beef',
+    'Fish',
+    'Turkey',
+    'Milk',
+    'Sweets',
+    'Catnip',
+    'Cheese',
+]
+
+const clothesList = [ // assuming P3/4
+    '',
+    'Shirt',
+    'Pant',
+    'Sock_FrontL',
+    'Sock_FrontR',
+    'Sock_BackL',
+    'Sock_BackR',
+    'Tail',
+    'Hat',
+    'Hat2',
+    'EarringL',
+    'EarringR',
+    'NoseThing',
+    'NoseThing2',
+    'Glasses',
+]
