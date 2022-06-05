@@ -1,0 +1,14 @@
+{
+  "name": "petz-file-parser",
+  "version": "1.0.0",
+  "description": "File reader for .pet files from the Petz games",
+  "main": "reader.js",
+  "scripts": {
+    "test": "test"
+  },
+  "author": "J Sanderson",
+  "license": "ISC",
+  "dependencies": {
+    "binary-parser": "^2.0.3"
+  }
+}
