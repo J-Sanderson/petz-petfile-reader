@@ -490,18 +490,223 @@ fs.readFile(process.argv[2], function (err, data) {
         //todo unknown 24 byte structures
     const unknownInfo = unknownInfoParser.parse(data);
 
-    //todo bipmap data
-    
+    //todo bitmap data
 
-    console.log(loadInfo);
-    console.log(plainData);
-    console.log(lnzInfo);
-    console.log(veterinaryInfo);
-    console.log(genome);
-    console.log(behaviourDescriptor);
-    console.log(associationMatrix);
-    console.log(ancestryInfo)
-    console.log(profileInfo);
-    console.log(dependentInfo);
-    console.log(unknownInfo);
+    // console.log(loadInfo);
+    // console.log(plainData);
+    // console.log(lnzInfo);
+    // console.log(veterinaryInfo);
+    // console.log(genome);
+    // console.log(behaviourDescriptor);
+    // console.log(associationMatrix);
+    // console.log(ancestryInfo)
+    // console.log(profileInfo);
+    // console.log(dependentInfo);
+    // console.log(unknownInfo);
+
+
+    fs.writeFile('output.txt', parseResults(
+        loadInfo,
+        plainData, 
+        lnzInfo, 
+        veterinaryInfo, 
+        genome, 
+        behaviourDescriptor,
+        associationMatrix
+    ), function(err) {
+        if (err) {
+            console.log('Error saving file');
+            process.exit();
+        }
+        console.log('Output saved!');
+    })
+
 });
+
+function parseResults(
+    loadInfo, 
+    plainData, 
+    lnzInfo, 
+    veterinaryInfo, 
+    genome, 
+    behaviourDescriptor,
+    associationMatrix
+    ) {
+    //todo properly display species icon flags, game version
+    return `
+${process.argv[2]} output:
+
+LOAD INFO:
+Session ID: ${loadInfo.sessionID}
+Pet name: ${loadInfo.petName}
+Pet breed: ${loadInfo.petBreed}
+Breedfile location: ${loadInfo.breedfileLocation}
+
+Unknown 32 bit integer: ${loadInfo.unknown1}
+Unknown 16 bit integer: ${loadInfo.unknown2}
+Barrier: ${loadInfo.barrier}
+Unknown 32 bit integer: ${loadInfo.unknown3}
+Species: ${loadInfo.species ? 'Dog' : 'Cat'}
+Species icon flags: ${loadInfo.speciesIconFlags}
+Game version: ${(loadInfo.gameVersion).toString(16)}
+File checksum: ${loadInfo.fileChecksum}
+GUID: ${parseGUID(loadInfo.guid)}
+
+---
+
+PLAIN DATA:
+
+Modifiers and thresholds:
+New day flag: ${plainData.newDayFlag} (${plainData.newDayFlag ? 
+    'Game not started today, pet will have energy 100 and fullness 50' : 
+    'Game started previously today, pet will have energy 100 and fullness 50 if the last save was over 30 minutes ago'
+})
+Treat training modifier: ${plainData.treatTrainingModifier} (${plainData.treatTrainingModifier ?
+    'Pet will fall over instead of attempting tricks' :
+    'Pet will attempt tricks'
+})
+Unknown 32 bit integer: ${plainData.unknown1}
+Unknown 32 bit integer: ${plainData.unknown2}
+Active neglect modifier: ${plainData.neglectModifierActive} (amount neglect will increment when disciplined)
+Passive neglect modifier: ${plainData.neglectModifierPassive} (amount neglect will decrement when brought out for the first time in the day)
+Neglect threshold: ${plainData.neglectThreshold} (pet will start acting neglected if the neglect level is greater than or equal to this value)
+Unknown 32 bit integer: ${plainData.unknown3}
+Runaway threshold: ${plainData.runawayThreshold} (pet will run away if the neglect level is greater than or equal to this value)
+Unknown 8 bit integer: ${plainData.unknown4}
+
+Event timestamps:
+Last played with: ${new Date(plainData.lastPlayedWith * 1000)}
+Last game start: ${new Date(plainData.lastGameStart * 1000)}
+Last fed: ${new Date(plainData.lastFed * 1000)}
+Last game start duplicate: ${new Date(plainData.lastGameStartDuplicate * 1000)}
+Unknown 32 bit integer: ${plainData.unknown5}
+Last played with duplicate: ${new Date(plainData.lastPlayedWithDuplicate * 1000)}
+Last saved: ${new Date(plainData.lastSaved * 1000)}
+Random seed: ${plainData.randomSeed}
+
+Trick knowledge:
+TODO
+
+Biorhythms:
+Energy: ${plainData.energy}
+Fullness: ${plainData.fullness}
+Fatness: ${plainData.fatness}
+Sickness: ${plainData.sickness}
+Catnipped: ${plainData.catnipped}
+Fleas: ${plainData.fleas}
+Horniness: ${plainData.horniness}
+Neglect: ${plainData.neglect}
+Age: ${plainData.age}
+
+File creation time:
+High res timestamp: ${plainData.fileCreationTime} (QueryPerformanceCounter value, unparsed here)
+
+Saved color info:
+Unknown 8 bit integer: ${plainData.unknown6}
+Unknown 8 bit integer: ${plainData.unknown7}
+Current eyelid color: ${plainData.currentEyelidColor} (if different to lnz value, will revert to lnz on restoring original colors)
+Number of ball paint flags: ${plainData.ballPaintFlagNumber}
+Ball paint flags: TODO
+Number of groups: ${plainData.numGroups}
+Group colors: TODO
+Number of balls: ${plainData.numBalls}
+Ball colors: TODO
+Padding value: ${plainData.padding}
+
+---
+
+LNZ INFO:
+
+Lnz:
+TODO
+
+Clothing info:
+TODO
+
+Breedfile info:
+Number of required breedfiles: ${lnzInfo.numRequiredBreedfiles}
+Required breedfiles: TODO
+
+--
+
+VETERINARY INFO:
+
+Statuses:
+Gender: ${veterinaryInfo.gender} (${veterinaryInfo.gender ? 'female' : 'male'})
+Is neutered: ${veterinaryInfo.isNeut ? 'Yes' : 'No'} 
+Is dependent: ${veterinaryInfo.isDep ? 'Yes' : 'No'} 
+Is pregnant: ${veterinaryInfo.isPreg ? 'Yes' : 'No'} 
+
+Veterinary info sections:
+Number of veterinary info sections: ${veterinaryInfo.numSections}
+Sections: TODO
+Number of biorhythm records: ${veterinaryInfo.numBiorhythms}
+Biorhythm records: TODO
+
+---
+
+GENOME:
+
+Sprite chromosome 1:
+Number of alleles: ${genome.numSpriteAlleles1}
+Alleles: TODO
+
+Behaviour chromosome 1:
+Number of alleles: ${genome.numBehaviourAlleles1}
+Alleles: TODO
+
+Looks chromosome 1:
+Number of alleles: ${genome.numLooksAlleles1}
+Alleles: TODO
+
+Sprite chromosome 2:
+Number of alleles: ${genome.numSpriteAlleles2}
+Alleles: TODO
+
+Behaviour chromosome 2:
+Number of alleles: ${genome.numBehaviourAlleles2}
+Alleles: TODO
+
+Looks chromosome 2:
+Number of alleles: ${genome.numLooksAlleles2}
+Alleles: TODO
+
+---
+
+BEHAVIOUR DESCRIPTOR:
+
+Sprite descriptor:
+Number of alleles: ${behaviourDescriptor.numSpriteAlleles}
+Alleles: TODO
+
+Goal descriptor:
+Number of alleles: ${behaviourDescriptor.numGoalAlleles}
+Alleles: TODO
+
+---
+
+ASSOCIATION MATRIX:
+
+Number of sprite keys: ${associationMatrix.numSpriteKeys}
+Sprite keys: TODO
+
+Number of goal keys: ${associationMatrix.numGoalKeys}
+Goal keys: TODO
+
+Number of integer values: ${associationMatrix.numValInts}
+Integer values: TODO
+
+Number of timestamp values: ${associationMatrix.numTimestamps}
+Timestamp values: TODO
+
+Number of affinity descriptors: ${associationMatrix.numAffinityDescriptors}
+Affinity descriptors: TODO
+    `;
+    //TODO ancestry, dependents, unknown values, bitmap data
+}
+
+function parseGUID(guid) {
+    return guid.map(function(byte) {
+        return byte.toString(16);
+    }).join(' ');
+}
