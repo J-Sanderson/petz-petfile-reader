@@ -18,7 +18,7 @@ The parser does not make any modifications to .pet files and so should not cause
 
 Download and run `npm install`
 
-Once installed, move the .pet file is in the root directory and run:
+Once installed, copy the .pet file you wish to parse into the root directory and run:
 
 `node reader.js (pet filename)`
 
@@ -27,3 +27,7 @@ e.g.
 `node reader.js Bootz.pet`
 
 See output.txt for results.
+
+## Credits
+
+This parser is built upon [Reflet's petfile breakdown](https://docs.google.com/document/d/1PFZd2iRU0wacHCR0B2onnEHvk3iBlTJUM-exgpxHZrs/edit) and could not have been possible wihout their work reverse engineering the file format.
