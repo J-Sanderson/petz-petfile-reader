@@ -718,14 +718,32 @@ function parseGUID(guid) {
 }
 
 function parseTrickKnowledge(tricks) {
+    let tricksByFlavor = [
+        tricks.slice(0, 15), //chicken
+        tricks.slice(15, 30), //beef
+        tricks.slice(30, 45), //fish
+        tricks.slice(45, 60), //turkey
+        tricks.slice(60, 75), //milk
+        tricks.slice(75, 100), //sweets
+        tricks.slice(100, 105), //catnip
+        tricks.slice(105, 120), //cheese
+    ];
+
+    return tricksByFlavor.map(function (flavor, index) {
+        return `
+Flavor: ${flavorList[index]}
+${parseTricks(flavor, flavorList[index])}
+        `
+    }).join('');
+}
+
+function parseTricks(tricks, flavor) {
     const unsetAction = 4294967295; //hex FFFFFFFF
     // is this also in use for direction/angle/association?
 
-    return tricks.map(function (trick, index) {
+    return tricks.map(function(trick, index) {
         return `
-Trick slot: ${index}
-Flavor: ${getTrickFlavor(index)}
-Gesture: TODO
+Gesture: ${getGesture(index, flavor)}
 Plan ID: ${trick.planID}
 Associated action: ${trick.associatedAction === unsetAction ? 'Not set' : trick.associatedAction + ' (breed SCP action ID)'} 
 Direction: ${trick.direction}
@@ -735,39 +753,47 @@ Association: ${trick.angle}
     }).join('');
 }
 
-function getTrickFlavor(index) {
-    // TODO need to slice array into flavours and get gesture slots by position
-    let flavor = '';
+function getGesture(index, flavor) {
+    if (flavor === 'Catnip') {
+        switch (index) {
+            case 0:
+                return 'Toy';
+                break;
+            case 1:
+                return 'Up';
+                break;
+            case 2:
+                return 'Down';
+                break;
+            case 3:
+                return 'Left';
+                break;
+            case 4:
+                return 'Right';
+                break;
+            default:
+                return 'Unknown';
+        }
+    }
     switch (true) {
-        case (index <= 15):
-            flavor = 'Chicken';
+        case (index <= 2):
+            return 'Toy';
             break;
-        case (index > 15 && index <= 30):
-            flavor = 'Beef';
+        case (index > 2 && index <= 5):
+            return 'Up';
             break;
-        case (index > 30 && index <= 45):
-            flavor = 'Fish';
+        case (index > 5 && index <= 8):
+            return 'Down';
             break;
-        case (index > 45 && index <= 60):
-            flavor = 'Turkey';
+        case (index > 8 && index <= 11):
+            return 'Left';
             break;
-        case (index > 60 && index <= 75):
-            flavor = 'Milk';
-            break;
-        case (index > 75 && index <= 100):
-            flavor = 'Sweets';
-            break;
-        case (index > 100 && index <= 105):
-            flavor = 'Catnip';
-            break;
-        case (index > 105 && index <= 120):
-            flavor = 'Cheese';
+        case (index > 11 && index <= 14):
+            return 'Right';
             break;
         default:
             return 'Unknown';
     }
-
-    return flavor;
 }
 
 function parseClothingInfo(slots) {
