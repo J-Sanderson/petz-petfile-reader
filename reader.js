@@ -654,27 +654,27 @@ GENOME:
 
 Sprite chromosome 1:
 Number of alleles: ${genome.numSpriteAlleles1}
-Alleles: ${parseChromosome(genome.spriteChromosome1)}
+Alleles: ${parseChromosome(genome.spriteChromosome1, 'sprite')}
 
 Behaviour chromosome 1:
 Number of alleles: ${genome.numBehaviourAlleles1}
-Alleles: TODO
+Alleles: ${parseChromosome(genome.behaviourChromosome1, 'behaviour')}
 
 Looks chromosome 1:
 Number of alleles: ${genome.numLooksAlleles1}
-Alleles: TODO
+Alleles: ${parseChromosome(genome.looksChromosome1, 'looks')}
 
 Sprite chromosome 2:
 Number of alleles: ${genome.numSpriteAlleles2}
-Alleles: TODO
+Alleles: ${parseChromosome(genome.spriteChromosome2, 'sprite')}
 
 Behaviour chromosome 2:
 Number of alleles: ${genome.numBehaviourAlleles2}
-Alleles: TODO
+Alleles: ${parseChromosome(genome.behaviourChromosome2, 'behaviour')}
 
 Looks chromosome 2:
 Number of alleles: ${genome.numLooksAlleles2}
-Alleles: TODO
+Alleles: ${parseChromosome(genome.looksChromosome2, 'looks')}
 
 ---
 
@@ -831,13 +831,22 @@ Age: ${record.age}
     }).join('');
 }
 
-function parseChromosome(chromosome) {
-    return chromosome.map(function(allele) {
+function parseChromosome(chromosome, type) {
+    const unused = 4294967295; //hex FFFFFFFF
+    const centerType = {
+        sprite: `The pet's preferred value for this adjective. Flags the allele as unused if equal to ${unused} (hex FFFFFFFF)`,
+        behaviour: 'The pet\s trait level',
+        looks: 'Either a breed ID or a integer value',
+    }
+
+    return chromosome.map(function(allele, index) {
+        // TODO parse out bitmasks for faves
         return `
-Center: ${allele.center}
-Range: ${allele.range}
+Name: ${chromosomeList[type][index]} ${allele.center === unused ? '(unused)' : ''}
+Center: ${allele.center} (${centerType[type]})
+Range: ${allele.range} (Maximum possible deviation from the center value.${type === 'looks' ? ' Either the pet\'s seed value, or unused' : ''})
 Is bitmask: ${allele.bitmaskFlag ? 'Yes' : 'No'}
-Weight: ${allele.weight}
+Weight: ${allele.weight} (Dictates how important this trait is)
 Weight type: ${allele.weightType}
 Combine type: ${allele.combineType}
         `
@@ -920,3 +929,99 @@ const veterinarySectionList = [
         storedLevel: 'fatness',
     },
 ]
+
+chromosomeList = {
+    sprite: [
+        'Type',
+        'Chrz',
+        'Toyz',
+        'Prop',
+        'Part',
+        '3D',
+        'Color',
+        'Flavor',
+        'Size',
+        'Mass',
+        'Friction',
+        'Tasty',
+        'Edible',
+        'Fatty',
+        'Liquid',
+        'Drug',
+        'Aphrodisiac',
+        'Discipline',
+        'Chew',
+        'Tug',
+        'Density',
+        'Thickness',
+        'Soft',
+        'Fuzzy',
+        'Round',
+        'Bounce',
+        'Swatty',
+        'Pretty',
+        'Vain',
+        'Paint',
+        'Groom',
+        'BadNoisy',
+        'NiceNoisy',
+        'Flies',
+        'Rideable',
+        'Mouselike',
+        'Unknown1',
+        'Unknown2',
+        'Unknown3',
+        'Unknown4',
+    ],
+    behaviour: [
+        'Liveliness',
+        'Playfulness',
+        'Independence',
+        'Confidence',
+        'Naughtiness',
+        'Acrobaticness',
+        'Patience',
+        'Kindness',
+        'Nurturing',
+        'Finickiness',
+        'Intelligence',
+        'Messiness',
+        'Quirkiness',
+        'Insanity',
+        'Constitution',
+        'Metabolism',
+        'Dogginess',
+        'LoveDestiny',
+        'Fertility',
+        'LoveLoyalty',
+        'Libido',
+        'OffspringSex',
+    ],
+    looks: [
+        'Unknown1',
+        'Unknown2',
+        'Default Scale',
+        'Ears',
+        'Head',
+        'Whiskers',
+        'Feet',
+        'Legs',
+        'Tail',
+        'Body',
+        'Coat',
+        'Tongue',
+        'Eye Color',
+        'Lid Color',
+        'Coat Color 1',
+        'Coat Color 2',
+        'Coat Color 3',
+        'Coat Color 4',
+        'Coat Color 5',
+        'Marking Factor 2',
+        'Marking Factor 1',
+        'Marking 1',
+        'Marking 2',
+        'Leg Extension',
+        'Body Extension',
+    ],
+};
