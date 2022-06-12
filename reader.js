@@ -8,6 +8,8 @@ if (!process.argv[2]) {
 }
 console.log(`Searching for ${process.argv[2]}`);
 
+// INITIAL DATA
+
 fs.readFile(process.argv[2], function (err, data) {
     if (err) {
         console.log(`Could not find file ${process.argv[2]}. Please make sure the file is in the same directory as this script and you have correctly entered the file name.`);
@@ -496,7 +498,7 @@ fs.readFile(process.argv[2], function (err, data) {
     // console.log(plainData);
     // console.log(lnzInfo);
     // console.log(veterinaryInfo);
-    // console.log(genome);
+    console.log(genome);
     // console.log(behaviourDescriptor);
     // console.log(associationMatrix);
     // console.log(ancestryInfo)
@@ -522,6 +524,8 @@ fs.readFile(process.argv[2], function (err, data) {
     })
 
 });
+
+// TEXT OUTPUT
 
 function parseResults(
     loadInfo, 
@@ -642,8 +646,7 @@ Number of veterinary info sections: ${veterinaryInfo.numSections}
 Sections:
 ${parseVeterinarySections(veterinaryInfo.sections)}
 Number of biorhythm records: ${veterinaryInfo.numBiorhythms}
-Biorhythm records:
-${parseBiorhythmRecords(veterinaryInfo.biorhythms)}
+Biorhythm records: ${parseBiorhythmRecords(veterinaryInfo.biorhythms)}
 
 ---
 
@@ -651,7 +654,7 @@ GENOME:
 
 Sprite chromosome 1:
 Number of alleles: ${genome.numSpriteAlleles1}
-Alleles: TODO
+Alleles: ${parseChromosome(genome.spriteChromosome1)}
 
 Behaviour chromosome 1:
 Number of alleles: ${genome.numBehaviourAlleles1}
@@ -706,6 +709,8 @@ Affinity descriptors: TODO
     `;
     //TODO ancestry, dependents, unknown values, bitmap data
 }
+
+// PARSING FUNCTIONS
 
 function parseGUID(guid) {
     return guid.map(function(byte) {
@@ -823,10 +828,23 @@ Horniness: ${record.horniness}
 Neglect: ${record.neglect}
 Age: ${record.age}
         `
-    }).join('\n');
+    }).join('');
 }
 
-// references
+function parseChromosome(chromosome) {
+    return chromosome.map(function(allele) {
+        return `
+Center: ${allele.center}
+Range: ${allele.range}
+Is bitmask: ${allele.bitmaskFlag ? 'Yes' : 'No'}
+Weight: ${allele.weight}
+Weight type: ${allele.weightType}
+Combine type: ${allele.combineType}
+        `
+    }).join('');
+}
+
+// REFERENCES
 
 const flavorList = [
     'Chicken',
