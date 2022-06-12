@@ -498,7 +498,7 @@ fs.readFile(process.argv[2], function (err, data) {
     // console.log(veterinaryInfo);
     // console.log(genome);
     // console.log(behaviourDescriptor);
-    // console.log(associationMatrix);
+    console.log(associationMatrix);
     // console.log(ancestryInfo)
     // console.log(profileInfo);
     // console.log(dependentInfo);
@@ -691,19 +691,20 @@ Alleles: ${parseChromosome(behaviourDescriptor.goalDescriptor, 'behaviour', true
 ASSOCIATION MATRIX:
 
 Number of sprite keys: ${associationMatrix.numSpriteKeys}
-Sprite keys: TODO
+Sprite keys: ${parseSpriteKeys(associationMatrix.spriteKeys)}
 
 Number of goal keys: ${associationMatrix.numGoalKeys}
-Goal keys: TODO
+Goal keys: ${parseGoalKeys(associationMatrix.goalKeys)}
 
 Number of integer values: ${associationMatrix.numValInts}
-Integer values: TODO
+Integer values: ${parseIntegerValues(associationMatrix.valInts)}
 
 Number of timestamp values: ${associationMatrix.numTimestamps}
-Timestamp values: TODO
+Timestamp values:
+${parseTimestampValues(associationMatrix.timestamps)}
 
 Number of affinity descriptors: ${associationMatrix.numAffinityDescriptors}
-Affinity descriptors: TODO
+Affinity descriptors: ${parseAffinityDescriptors(associationMatrix.affinityDescriptors)}
     `;
     //TODO ancestry, dependents, unknown values, bitmap data
 }
@@ -855,6 +856,58 @@ Centering rate: ${allele.centeringRate}
         }
         return str + '\n';
     }).join('');
+}
+
+function parseSpriteKeys(keys) {
+    return keys.map(function (key) {
+        let timestampIndexes = key.timestampIndexes.map(function(index) {
+            return index.number;
+        }).join(', ')
+        return `
+Number of timestamps: ${key.numTimestamps}
+Timestamp indexes: ${timestampIndexes}
+GUID: ${parseGUID(key.guid)} (either a pet ID, or all zeroes)
+Sprite ID: ${key.spriteID} (breed, toy etc ID, depending on what this key refers to)
+        `
+    }).join('');
+}
+
+function parseGoalKeys(keys) {
+    return keys.map(function(key) {
+        let timestampIndexes = key.timestampIndexes.map(function(index) {
+            return index.number;
+        }).join(', ')
+        return `
+Number of timestamps: ${key.numTimestamps}
+Timestamp indexes: ${timestampIndexes}
+Unknown ID: ${key.unknownID}
+        `
+    }).join('');
+}
+
+function parseIntegerValues(values) {
+    return values.map(function(value) {
+        return value.number;
+    }).join(', ');
+}
+
+function parseTimestampValues(values) {
+    return values.map(function(value) {
+        return new Date(value.number * 1000);
+    }).join('\n');
+}
+
+function parseAffinityDescriptors(descriptors) {
+    return descriptors.map(function(descriptor) {
+        return `
+GUID: ${parseGUID(descriptor.guid)}
+Unknown value 1: ${descriptor.unknown1}
+Unknown value 2: ${descriptor.unknown2}
+Unknown value 3: ${descriptor.unknown3}
+Unknown value 4: ${descriptor.unknown4}
+Unknown value 5: ${descriptor.unknown5}
+        `
+    }).join('')
 }
 
 // REFERENCES
