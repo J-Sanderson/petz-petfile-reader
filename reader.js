@@ -639,9 +639,11 @@ Is pregnant: ${veterinaryInfo.isPreg ? 'Yes' : 'No'}
 
 Veterinary info sections:
 Number of veterinary info sections: ${veterinaryInfo.numSections}
-Sections: TODO
+Sections:
+${parseVeterinarySections(veterinaryInfo.sections)}
 Number of biorhythm records: ${veterinaryInfo.numBiorhythms}
-Biorhythm records: TODO
+Biorhythm records:
+${parseBiorhythmRecords(veterinaryInfo.biorhythms)}
 
 ---
 
@@ -730,7 +732,7 @@ Association: ${trick.angle}
 }
 
 function getTrickFlavor(index) {
-    // TODO need to slice array into flavours and get geture slots by position
+    // TODO need to slice array into flavours and get gesture slots by position
     let flavor = '';
     switch (true) {
         case (index <= 15):
@@ -776,6 +778,56 @@ Resource path: ${slot.clothingResourcePath}
     }).join('');
 }
 
+function parseVeterinarySections(sections) {
+    return veterinarySectionList.map(function(listItem) {
+        let match = sections.find(function(section) {
+            return section.name.split('').reverse().join('') === listItem.name;
+        });
+        if (match) {
+            return `
+Name: ${listItem.name}
+Description: Number of times the function ${listItem.func} was called${listItem.itemTrigger ? ' if triggered by the ' + listItem.itemTrigger : ''}.
+Present: Yes
+Max number of records stored: ${match.maxRecords}
+Number of timestamps stored: ${match.numTimestamps}
+Number of ${listItem.storedLevel} levels stored: ${match.numLevels}
+Records:
+${parseVeterinaryTimestamp(match)}
+            `;
+        }
+        return `
+Name: ${listItem.name}
+Description: Number of times the function ${listItem.func} was called.
+Present: No
+        `;
+    }).join('')
+}
+
+function parseVeterinaryTimestamp(record) {
+    return record.timestamps.map(function(timestamp, index) {
+        return `${new Date(timestamp.number * 1000)}: ${record.levels[index].number}`;
+    }).join('\n');
+}
+
+function parseBiorhythmRecords(biorhythms) {
+    return biorhythms.map(function(record) {
+        return `
+Date: ${new Date(record.recordTime)}
+Energy: ${record.energy}
+Fullness: ${record.fullness}
+Fatness: ${record.fatness}
+Sickness: ${record.sickness}
+Catnipped: ${record.catnipped}
+Fleas: ${record.fleas}
+Horniness: ${record.horniness}
+Neglect: ${record.neglect}
+Age: ${record.age}
+        `
+    }).join('\n');
+}
+
+// references
+
 const flavorList = [
     'Chicken',
     'Beef',
@@ -803,4 +855,50 @@ const clothesList = [ // assuming P3/4
     'NoseThing',
     'NoseThing2',
     'Glasses',
+]
+
+// show all of these, display 'not present' if the petfile doesn't have it.
+const veterinarySectionList = [
+    {
+        name: 'PLAY',
+        func: 'PetSprite::GotPlayedWith',
+        storedLevel: 'neglect',
+    },
+    {
+        name: 'BFED',
+        func: 'PlanEatDrinkFromBowl::Execute',
+        storedLevel: 'fatness',
+    },
+    {
+        name: 'CATN',
+        func: 'PetSprite::HandleCatnipped',
+        storedLevel: 'catnipped',
+    },
+    {
+        name: 'DISC',
+        func: 'PetSprite::HandleDisciplined',
+        storedLevel: 'naughtiness', // trait, not biorhythm
+    },
+    {
+        name: 'MATE',
+        func: 'PetSprite::Mate',
+        storedLevel: 'unknown', // always 1
+    },
+    {
+        name: 'MFLE',
+        func: 'PetSprite::EventMedicine',
+        itemTrigger: 'flea spray',
+        storedLevel: 'fleas',
+    },
+    {
+        name: 'MSCK',
+        func: 'PetSprite::EventMedicine',
+        itemTrigger: 'medicine bottle',
+        storedLevel: 'sickness',
+    },
+    {
+        name: 'TREA',
+        func: 'PlanEatCapturedSprite::Execute',
+        storedLevel: 'fatness',
+    },
 ]
