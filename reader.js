@@ -245,8 +245,6 @@ fs.readFile(process.argv[2], function (err, data) {
         .uint32('weight')
         .uint8('weightType')
         .uint8('combineType')
-        // .uint32('offset')
-        // .uint32('centeringRate')
     const genomeParser = new Parser()
         .endianess('little')
         .seek(veterinaryInfo.currentOffset)
@@ -498,7 +496,7 @@ fs.readFile(process.argv[2], function (err, data) {
     // console.log(plainData);
     // console.log(lnzInfo);
     // console.log(veterinaryInfo);
-    console.log(genome);
+    // console.log(genome);
     // console.log(behaviourDescriptor);
     // console.log(associationMatrix);
     // console.log(ancestryInfo)
@@ -654,27 +652,27 @@ GENOME:
 
 Sprite chromosome 1:
 Number of alleles: ${genome.numSpriteAlleles1}
-Alleles: ${parseChromosome(genome.spriteChromosome1, 'sprite')}
+Alleles: ${parseChromosome(genome.spriteChromosome1, 'sprite', false)}
 
 Behaviour chromosome 1:
 Number of alleles: ${genome.numBehaviourAlleles1}
-Alleles: ${parseChromosome(genome.behaviourChromosome1, 'behaviour')}
+Alleles: ${parseChromosome(genome.behaviourChromosome1, 'behaviour', false)}
 
 Looks chromosome 1:
 Number of alleles: ${genome.numLooksAlleles1}
-Alleles: ${parseChromosome(genome.looksChromosome1, 'looks')}
+Alleles: ${parseChromosome(genome.looksChromosome1, 'looks', false)}
 
 Sprite chromosome 2:
 Number of alleles: ${genome.numSpriteAlleles2}
-Alleles: ${parseChromosome(genome.spriteChromosome2, 'sprite')}
+Alleles: ${parseChromosome(genome.spriteChromosome2, 'sprite', false)}
 
 Behaviour chromosome 2:
 Number of alleles: ${genome.numBehaviourAlleles2}
-Alleles: ${parseChromosome(genome.behaviourChromosome2, 'behaviour')}
+Alleles: ${parseChromosome(genome.behaviourChromosome2, 'behaviour', false)}
 
 Looks chromosome 2:
 Number of alleles: ${genome.numLooksAlleles2}
-Alleles: ${parseChromosome(genome.looksChromosome2, 'looks')}
+Alleles: ${parseChromosome(genome.looksChromosome2, 'looks', false)}
 
 ---
 
@@ -682,11 +680,11 @@ BEHAVIOUR DESCRIPTOR:
 
 Sprite descriptor:
 Number of alleles: ${behaviourDescriptor.numSpriteAlleles}
-Alleles: TODO
+Alleles: ${parseChromosome(behaviourDescriptor.spriteDescriptor, 'sprite', true)}
 
 Goal descriptor:
 Number of alleles: ${behaviourDescriptor.numGoalAlleles}
-Alleles: TODO
+Alleles: ${parseChromosome(behaviourDescriptor.goalDescriptor, 'behaviour', true)}
 
 ---
 
@@ -831,7 +829,7 @@ Age: ${record.age}
     }).join('');
 }
 
-function parseChromosome(chromosome, type) {
+function parseChromosome(chromosome, type, isDescriptor) {
     const unused = 4294967295; //hex FFFFFFFF
     const centerType = {
         sprite: `The pet's preferred value for this adjective. Flags the allele as unused if equal to ${unused} (hex FFFFFFFF)`,
@@ -841,15 +839,21 @@ function parseChromosome(chromosome, type) {
 
     return chromosome.map(function(allele, index) {
         // TODO parse out bitmasks for faves
-        return `
+        let str = `
 Name: ${chromosomeList[type][index]} ${allele.center === unused ? '(unused)' : ''}
 Center: ${allele.center} (${centerType[type]})
 Range: ${allele.range} (Maximum possible deviation from the center value.${type === 'looks' ? ' Either the pet\'s seed value, or unused' : ''})
 Is bitmask: ${allele.bitmaskFlag ? 'Yes' : 'No'}
 Weight: ${allele.weight} (Dictates how important this trait is)
 Weight type: ${allele.weightType}
-Combine type: ${allele.combineType}
-        `
+Combine type: ${allele.combineType}`
+        if (isDescriptor) {
+            return str + `
+Offset: ${allele.offset}
+Centering rate: ${allele.centeringRate}
+            `;
+        }
+        return str + '\n';
     }).join('');
 }
 
@@ -972,6 +976,7 @@ chromosomeList = {
         'Unknown2',
         'Unknown3',
         'Unknown4',
+        // TODO there appears to be a final value here unlisted in the document, but in use
     ],
     behaviour: [
         'Liveliness',
