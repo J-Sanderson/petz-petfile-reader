@@ -498,7 +498,7 @@ fs.readFile(process.argv[2], function (err, data) {
     // console.log(veterinaryInfo);
     // console.log(genome);
     // console.log(behaviourDescriptor);
-    console.log(associationMatrix);
+    // console.log(associationMatrix);
     // console.log(ancestryInfo)
     // console.log(profileInfo);
     // console.log(dependentInfo);
