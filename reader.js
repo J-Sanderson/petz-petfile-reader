@@ -243,7 +243,7 @@ fs.readFile(process.argv[2], function (err, data) {
 
     const alleleParser = new Parser()
         .endianess('little')
-        .uint32('center')
+        .int32('center')
         .uint32('range')
         .uint8('bitmaskFlag')
         .uint32('weight')
@@ -890,10 +890,10 @@ Age: ${record.age}
 }
 
 function parseChromosome(chromosome, type, isDescriptor) {
-    const unused = 4294967295; //hex FFFFFFFF
+    const unused = -1; //hex FFFFFFFF
     const centerType = {
         sprite: `The pet's preferred value for this adjective. Flags the allele as unused if equal to ${unused} (hex FFFFFFFF)`,
-        behaviour: 'The pet\s trait level',
+        behaviour: 'The pet\'s trait level',
         looks: 'Either a breed ID or a integer value',
     }
 
