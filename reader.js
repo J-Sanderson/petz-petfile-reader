@@ -51,9 +51,9 @@ fs.readFile(process.argv[2], function (err, data) {
         .endianess('little')
         .uint32('planID')
         .uint32('associatedAction')
-        .uint32('direction')
-        .uint32('angle')
-        .uint32('association');
+        .int32('direction')
+        .int32('angle')
+        .int32('association');
     const uint32Parser = new Parser()
         .endianess('little')
         .uint32('number');
@@ -738,8 +738,7 @@ ${parseTricks(flavor, flavorList[index])}
 }
 
 function parseTricks(tricks, flavor) {
-    const unsetAction = 4294967295; //hex FFFFFFFF
-    // is this also in use for direction/angle/association?
+    const unsetAction = -1;
 
     return tricks.map(function(trick, index) {
         return `
