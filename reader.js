@@ -16,6 +16,13 @@ fs.readFile(process.argv[2], function (err, data) {
         process.exit();
     }
     console.log('File found!');
+
+    const uint32Parser = new Parser()
+        .endianess('little')
+        .uint32('number');
+    const int32Parser = new Parser()
+        .endianess('little')
+        .int32('number');
     
     const loadInfoParser = new Parser()
         .endianess('little')
@@ -54,9 +61,6 @@ fs.readFile(process.argv[2], function (err, data) {
         .int32('direction')
         .int32('angle')
         .int32('association');
-    const uint32Parser = new Parser()
-        .endianess('little')
-        .uint32('number');
     const plainDataParser = new Parser()
         .endianess('little')
         .seek(loadInfo.currentOffset)
@@ -111,7 +115,7 @@ fs.readFile(process.argv[2], function (err, data) {
         })
         .uint32('numGroups')
         .array('groupColors', {
-            type: uint32Parser, //because it won't accept uint32 as a type
+            type: int32Parser, //because it won't accept int32 as a type
             length: function() {
                 return this.numGroups;
             },
@@ -608,11 +612,14 @@ Unknown 8 bit integer: ${plainData.unknown6}
 Unknown 8 bit integer: ${plainData.unknown7}
 Current eyelid color: ${plainData.currentEyelidColor} (if different to lnz value, will revert to lnz on restoring original colors)
 Number of ball paint flags: ${plainData.ballPaintFlagNumber}
-Ball paint flags: TODO
+Ball paint flags: 
+${parseBallData(plainData.ballPaintFlags, loadInfo.species ? 'dog' : 'cat')}
 Number of groups: ${plainData.numGroups}
-Group colors: TODO
+Group colors:
+${parseGroupColours(plainData.groupColors)}
 Number of balls: ${plainData.numBalls}
-Ball colors: TODO
+Ball colors:
+${parseBallData(plainData.ballColors, loadInfo.species ? 'dog' : 'cat', true)}
 Padding value: ${plainData.padding}
 
 ---
@@ -627,7 +634,7 @@ ${parseClothingInfo(lnzInfo.clothing)}
 
 Breedfile info:
 Number of required breedfiles: ${lnzInfo.numRequiredBreedfiles}
-Required breedfiles: TODO
+Required breedfiles: TODO (only present in mixies)
 
 --
 
@@ -795,6 +802,33 @@ function getGesture(index, flavor) {
     }
 }
 
+function parseBallData(balls, species, isColor) {
+    const question = isColor ? 'Color:' : 'Is painted?';
+    const noColor = 248;
+    return balls.map(function(ball, index) {
+        let answer;
+        if (isColor) {
+            answer = ball.number === noColor ? 'Ball does not exist' : ball.number;
+        } else {
+            answer = ball.number === 1 ? 'Yes' : 'No';
+        }
+        return `
+Ball number: ${index} (${ballList[species][index] ? ballList[species][index] : 'addball'})
+${question} ${answer}
+        `
+    }).join('');
+}
+
+function parseGroupColours(groups) {
+    return groups.map(function(group, index) {
+        // TODO which group is which index?
+        return `
+Group: ${index}
+Color: ${group.number === -1 ? 'Not painted' : group.number}
+        `;
+    }).join('');
+}
+
 function parseClothingInfo(slots) {
     return slots.map(function(slot) {
         if (slot.slotNumber) {
@@ -948,6 +982,147 @@ const flavorList = [
     'Cheese',
 ]
 
+const ballList = {
+    cat: [
+        'ankleL',
+        'ankleR',
+        'belly',
+        'butt',
+        'cheekL',
+        'cheekR',
+        'chest',
+        'chin',
+        'earL1',
+        'earL2',
+        'earR1',
+        'earR2',
+        'elbowL',
+        'elbowR',
+        'eyeL',
+        'eyeR',
+        'fingerL 1',
+        'fingerL 2',
+        'fingerL 3',
+        'fingerR 1',
+        'fingerR 2',
+        'fingerR 3',
+        'handL',
+        'handR',
+        'head',
+        'hipL',
+        'hipR',
+        'irisL',
+        'irisR',
+        'jaw',
+        'jowlL',
+        'jowlR',
+        'kneeL',
+        'kneeR',
+        'knuckleL',
+        'knuckleR',
+        'neck',
+        'nose',
+        'shoulderL',
+        'shoulderR',
+        'snout',
+        'soleL',
+        'soleR',
+        'tail1',
+        'tail2',
+        'tail3',
+        'tail4',
+        'tail5',
+        'tail6',
+        'toeL 1',
+        'toeL 2',
+        'toeL 3',
+        'toeR 1',
+        'toeR 2',
+        'toeR 3',
+        'tongue 1',
+        'tongue 2',
+        'whiskerL 1',
+        'whiskerL 2',
+        'whiskerL 3',
+        'whiskerR 1',
+        'whiskerR 2',
+        'whiskerR 3',
+        'wristL',
+        'wristR',
+        'zTrans',
+        'zOrient',
+    ],
+    dog: [
+        'L ankle',
+        'L eyebrow 1',
+        'L eyebrow 2',
+        'L eyebrow 3',
+        'L ear 1',
+        'L ear 2',
+        'L ear 3', 
+        'L elbow',
+        'L eye',
+        'L finger 1',
+        'L finger 2',
+        'L finger 3', 
+        'L foot',
+        'L hand',
+        'L iris',
+        'L jowl',
+        'L knee',
+        'L nostril',
+        'L shoulder',
+        'L hip',
+        'L toe 1',
+        'L toe 2',
+        'L toe 3', 
+        'L wrist',
+        'R ankle',
+        'R eyebrow 1',
+        'R eyebrow 2',
+        'R eyebrow 3',
+        'R ear 1',
+        'R ear 2',
+        'R ear 3', 
+        'R elbow',
+        'R eye',
+        'R finger 1',
+        'R finger 2',
+        'R finger 3', 
+        'R foot',
+        'R hand',
+        'R iris',
+        'R jowl',
+        'R knee',
+        'R nostril',
+        'R shoulder',
+        'R hip',
+        'R toe 1',
+        'R toe 2',
+        'R toe 3', 
+        'R wrist',
+        'Belly',
+        'Butt',
+        'Chest',
+        'Chin',
+        'Head',
+        'Jaw',
+        'Neck',
+        'Nose (bottom)',
+        'Snout',
+        'Tail 1',
+        'Tail 2',
+        'Tail 3',
+        'Tail 4',
+        'Tail 5',
+        'Tail 6',
+        'Tongue 1',
+        'Tongue 2',
+        'zTrans',
+        'zOrient',
+    ],
+}
+
 const clothesList = [ // assuming P3/4
     '',
     'Shirt',
@@ -966,7 +1141,6 @@ const clothesList = [ // assuming P3/4
     'Glasses',
 ]
 
-// show all of these, display 'not present' if the petfile doesn't have it.
 const veterinarySectionList = [
     {
         name: 'PLAY',
