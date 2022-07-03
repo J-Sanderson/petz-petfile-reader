@@ -304,7 +304,7 @@ fs.readFile(process.argv[2], function (err, data) {
 
     const spriteAlleleParser = new Parser()
         .endianess('little')
-        .uint32('center')
+        .int32('center')
         .uint32('range')
         .uint8('bitmaskFlag')
         .uint32('weight')
@@ -907,6 +907,28 @@ Is bitmask: ${allele.bitmaskFlag ? 'Yes' : 'No'}
 Weight: ${allele.weight} (Dictates how important this trait is)
 Weight type: ${allele.weightType}
 Combine type: ${allele.combineType}`
+        if (chromosomeList[type][index] === 'Flavor') {
+            let vals = allele.center.toString(2).split('').reverse();
+            let flavors = [];
+            vals.forEach(function(val, index) {
+                if (parseInt(val)) {
+                    flavors.push(flavorList[index]);
+                }
+            });
+            str += `
+Flavors: ${flavors.join(', ')}`
+        }
+        if (chromosomeList[type][index] === 'Color') {
+            let vals = allele.center.toString(2).split('').reverse();
+            let colors = [];
+            vals.forEach(function(val, index) {
+                if (parseInt(val)) {
+                    colors.push(colorList[index]);
+                }
+            });
+            str += `
+Colors: ${colors.join(', ')}`
+        }
         if (isDescriptor) {
             return str + `
 Offset: ${allele.offset}
@@ -980,6 +1002,41 @@ const flavorList = [
     'Sweets',
     'Catnip',
     'Cheese',
+    'Colorful/smooth',
+    'Bouncy/squeaky',
+    'Soft/fuzzy',
+    'Bone',
+    'Wood/cardboard',
+    'Metallic/shiny',
+    'Water',
+    'Sandy',
+    'unused',
+    'Bad (hairballs, flea spray)',
+    'unused',
+    'unused',
+    'unused',
+    'unused',
+    'unused',
+    'Chemicals',
+    'Garbage',
+    'unused',
+    'Flea spray bottle outside',
+    'Plants',
+]
+
+const colorList = [
+    'white',
+    'black',
+    'red',
+    'green',
+    'yellow',
+    'blue',
+    'purple',
+    'pink',
+    'orange',
+    'brown',
+    'grey',
+    'clear/glossy',
 ]
 
 const ballList = {
@@ -1228,7 +1285,7 @@ chromosomeList = {
         'Unknown2',
         'Unknown3',
         'Unknown4',
-        // TODO there appears to be a final value here unlisted in the document, but in use
+        // TODO there appears to be a final value here unlisted in the document, but in use (or there is an off by one error?)
     ],
     behaviour: [
         'Liveliness',
